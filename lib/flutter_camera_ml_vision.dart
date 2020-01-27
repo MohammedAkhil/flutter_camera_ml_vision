@@ -75,23 +75,29 @@ class CameraMlVisionState<T> extends State<CameraMlVision<T>> {
     _initialize();
   }
 
-  Future<void> stop() async {
-    if (_cameraController != null) {
-      if (_lastImage != null && File(_lastImage).existsSync()) {
-        await File(_lastImage).delete();
-      }
+Future<void> stop() async {
+  await _cameraController.stopImageStream(); // add this line
+  if (_cameraController != null) {
 
-      Directory tempDir = await getTemporaryDirectory();
-      _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
-      try {
-        await _cameraController.takePicture(_lastImage);
-      } on PlatformException catch (e) {
-        debugPrint('$e');
-      }
+    if (_lastImage != null && File(_lastImage).existsSync()) {
 
-      _stop(false);
+      await File(_lastImage).delete();
     }
+
+    Directory tempDir = await getTemporaryDirectory();
+
+    _lastImage = '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}';
+    try {
+      await _cameraController.takePicture(_lastImage);
+    } on PlatformException catch (e) {
+
+      debugPrint('$e');
+    }
+
+    _stop(false);
+
   }
+}
 
   void _stop(bool silently) {
     Future.microtask(() async {
